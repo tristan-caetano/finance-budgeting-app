@@ -38,6 +38,8 @@ def main_menu():
         elif menu_in == '2':
             mm.mortgage_menu()
         else:
-            print("\nCommand not found, please input an available number or 'q'.\n")
+            print("Option not found, please input an available number or 'q'.\n")
 
         list_num = 1
+
+main_menu()
