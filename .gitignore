@@ -1,0 +1,3 @@
+# Ignore DB for now
+finance.db
+__pycache__/

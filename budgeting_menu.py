@@ -4,37 +4,32 @@
 
 # Importing Python scripts
 import mortgage_menu as mm
+import finance_sql as fs
+import profile_menu as pm
 
 # Importing packages
 import sqlite3
 from os.path import exists
 import pandas as pd
 
-def add_entry(record, con):
-
-    # Getting DB info
-    cur = con.cursor()
-
-    # Sending 1 entry to the DB
-    cur.executemany("INSERT INTO budgeting_profiles (name, income, payinterval) VALUES (:name, :income, :payinterval)", (record, ))
-
-    # Saving database info
-    con.commit()
-
-
+# Asking user to create a new profile
 def create_new_profile(con):
 
+    # Creating new dictionary for profile
     new_profile = dict()
 
+    # Getting user name
     new_profile["name"] = input("\nEnter your name.\n\n")
 
+    # Default value for payinterval for user input loop
     new_profile["payinterval"] = "NONE"
 
     list_num = 1
 
+    # Userin loop for payinterval
     while(True):
 
-        list_of_options = {"Weekly", "Bi-Weekly", "Monthly"}
+        list_of_options = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
 
         # Printing out all found files to user
         for option in list_of_options:
@@ -43,14 +38,10 @@ def create_new_profile(con):
         list_num = 1
 
         menu_in = input("\nEnter the number of the option that matches your pay frequency.\n")
-        
-        if menu_in == '1':
-            new_profile["payinterval"] = "Weekly"
-        elif menu_in == '2':
-            new_profile["payinterval"] = "Bi-Weekly"
-        elif menu_in == '3':
-            new_profile["payinterval"] = "Monthly"
-        else:
+
+        if int(menu_in) < len(list_of_options):
+            new_profile["payinterval"] = list_of_options[int(menu_in) - 1]
+        else:  
             print("Option not found, please input an available number.\n")
 
         if new_profile["payinterval"] != "NONE":
@@ -60,16 +51,18 @@ def create_new_profile(con):
 
     print("\nLength:", len(new_profile), "\n")
 
-    add_entry(new_profile, con)
+    fs.add_entry(new_profile, con)
 
 
 def budgeting_menu():
 
     # Initializing DB
-    con = init_DB()
+    con = fs.init_DB()
 
     # List of menu options
     list_of_options = ["Add Budget Profile"]
+
+    names = fs.get_profile_names(con)
     
     # Iterator for list
     list_num = 1
@@ -84,48 +77,25 @@ def budgeting_menu():
             print(str(list_num) + ").", option), "\n"
             list_num += 1
         
+        for name in names:
+            print(str(list_num) + ").", name[1], "ID:", name[0]), "\n"
+            list_num += 1
+        
         menu_in = input("\nEnter the number of the option you would like, or enter 'q' to go back to the previous menu.\n")
 
         if menu_in == "q" or menu_in == "Q":
-            return
-        elif menu_in == '1':
-            create_new_profile(con)
+                return
+        elif int(menu_in) < list_num and int(menu_in) > 0:
+            if menu_in == '1':
+                create_new_profile(con)
+            else:
+                pm.profile_menu(int(menu_in) - 1, con)
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
 
         list_num = 1
 
 
-def get_DB_data(con):
 
-    # Getting DB info
-    cur = con.cursor()
-
-    # SQL query to get all info from DB
-    result = cur.execute(
-        '''SELECT Name''').fetchall()
-
-    # Returning DB data
-    return result
-
-def init_DB():
-
-    # Name of default vinyl record CSV file
-    finance_sql = "finance.db"
-
-    # Making sure the SQL exists
-    if not exists(finance_sql):
-        # Connecting to DB
-        con = sqlite3.connect(finance_sql)
-        cur = con.cursor()
-        cur.execute(
-            "CREATE TABLE budgeting_profiles(ID INTEGER PRIMARY KEY, name TEXT, income TEXT, payinterval TEXT)")
-
-    else:
-        # Connecting to DB
-        con = sqlite3.connect(finance_sql)
-
-    # Returning DB info
-    return con
 
 
