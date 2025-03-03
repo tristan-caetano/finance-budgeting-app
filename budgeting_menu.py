@@ -16,7 +16,7 @@ def add_entry(record, con):
     cur = con.cursor()
 
     # Sending 1 entry to the DB
-    cur.execute("INSERT INTO budgeting_profiles(name, income, payinterval) VALUES(?, ?, ?)", record)
+    cur.executemany("INSERT INTO budgeting_profiles (name, income, payinterval) VALUES (:name, :income, :payinterval)", (record, ))
 
     # Saving database info
     con.commit()
@@ -24,11 +24,11 @@ def add_entry(record, con):
 
 def create_new_profile(con):
 
-    new_profile = {}
+    new_profile = dict()
 
-    new_profile[0] = input("\nEnter your name.\n\n")
+    new_profile["name"] = input("\nEnter your name.\n\n")
 
-    new_profile[2] = "NONE"
+    new_profile["payinterval"] = "NONE"
 
     list_num = 1
 
@@ -40,24 +40,25 @@ def create_new_profile(con):
         for option in list_of_options:
             print(str(list_num) + ").", option), "\n"
             list_num += 1
+        list_num = 1
 
         menu_in = input("\nEnter the number of the option that matches your pay frequency.\n")
         
         if menu_in == '1':
-            new_profile[2] = "Weekly"
+            new_profile["payinterval"] = "Weekly"
         elif menu_in == '2':
-            new_profile[2] = "Bi-Weekly"
+            new_profile["payinterval"] = "Bi-Weekly"
         elif menu_in == '3':
-            new_profile[2] = "Monthly"
+            new_profile["payinterval"] = "Monthly"
         else:
             print("Option not found, please input an available number.\n")
 
-        list_num = 1
-
-        if new_profile[2] != "NONE":
+        if new_profile["payinterval"] != "NONE":
             break
 
-    new_profile[1] = input("\nEnter your income\n")
+    new_profile["income"] = input("\nEnter your income\n")
+
+    print("\nLength:", len(new_profile), "\n")
 
     add_entry(new_profile, con)
 
@@ -118,7 +119,7 @@ def init_DB():
         con = sqlite3.connect(finance_sql)
         cur = con.cursor()
         cur.execute(
-            "CREATE TABLE budgeting_profiles(ID INT PRIMARY KEY, name TEXT, income TEXT, payinterval INT)")
+            "CREATE TABLE budgeting_profiles(ID INTEGER PRIMARY KEY, name TEXT, income TEXT, payinterval TEXT)")
 
     else:
         # Connecting to DB
