@@ -56,18 +56,17 @@ def create_new_profile(con):
 
 def budgeting_menu():
 
-    # Initializing DB
-    con = fs.init_DB()
-
     # List of menu options
     list_of_options = ["Add Budget Profile"]
-
-    names = fs.get_profile_names(con)
     
     # Iterator for list
     list_num = 1
 
     while(True):
+
+        # Initializing DB
+        con = fs.init_DB()
+        names = fs.get_profile_names(con)
 
         print("\nBudgeting Menu\n")
 
@@ -89,13 +88,10 @@ def budgeting_menu():
             if menu_in == '1':
                 create_new_profile(con)
             else:
-                pm.profile_menu(int(menu_in) - 1, con)
+                pm.profile_menu(int(menu_in) - 1)
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
 
         list_num = 1
-
-
-
 
 

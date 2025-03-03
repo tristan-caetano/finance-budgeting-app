@@ -1,18 +1,19 @@
 # Tristan Caetano
-# Finance Budgeting App: Budgeting Menu
+# Finance Budgeting App: Profile Menu
 # This menu helps the user navigate their own profile
 
 # Importing Python scripts
 import mortgage_menu as mm
 import budgeting_menu as bd
 import finance_sql as fs
+import expenses_menu as em
 
 # Importing packages
 import sqlite3
 from os.path import exists
 import pandas as pd
 
-def profile_menu(userid, con):
+def profile_menu(userid):
 
     # Initializing DB
     con = fs.init_DB()
@@ -33,7 +34,7 @@ def profile_menu(userid, con):
 
         print("\nProfile Menu\n")
         list_of_options = ["View Full Profile", "Add/Remove Expenses", "Mortgage Menu"]
-        list_of_options_link = [view_full_profile, expenses, mm.mortgage_menu]
+        list_of_options_link = [view_full_profile, em.expenses_menu, mm.mortgage_menu]
 
         # Printing out all found files to user
         for option in list_of_options:
@@ -55,6 +56,3 @@ def profile_menu(userid, con):
 
 def view_full_profile(userid):
      print("prof")
-
-def expenses(userid):
-     print("expenses")
