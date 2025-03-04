@@ -94,8 +94,45 @@ def expenses_menu(userid):
 
         list_num = 1
 
-def remove_expense():
-    print("remove")
+# Remove specified expense by name
+def remove_expense(con, userid):
+    cur = con.cursor()
+
+    while(True):
+
+        # Getting user name
+        expense = input("\nEnter the name of the expense you would like to delete, enter q to quit.\n\n")
+
+        if expense == "q" or expense == "Q":
+            return
+
+        # Getting expenses per frequency for the current profile
+        query = 'SELECT * FROM expense_profiles WHERE ID LIKE "'+str(userid)+'" AND name like "'+expense+'"'
+        
+         # Try except block in case an error is thrown
+        try:
+
+            # Getting data for specified expense
+            expenses = fs.custom_query(con, query)
+
+            for an_expense in expenses:
+                print(an_expense[1] + ",",an_expense[2])
+
+            # Printing recieved data to user can verify
+            user_in = input("Is this correct?\n(Y) or (y) for yes, any other character for no.\n")
+
+        except:
+            print("\nCannot find expense using that search.\n")
+
+         # If the user verified the album grabbed was correct, proceed
+        if(user_in == "y" or user_in == "Y"):
+            # Query that deletes 1 record for a specific album by name
+            query = 'DELETE FROM expense_profiles WHERE name LIKE "'+expense+'" AND ID LIKE "'+str(userid)+'"'
+
+            # Executing the query and saving changes
+            cur.execute(query)
+            con.commit()
+            return
 
 # Print all expenses for current profile
 def view_expense_report(con, userid):
