@@ -96,8 +96,49 @@ def expenses_menu(userid):
 
 def remove_expense():
     print("remove")
-def view_expense_report():
-    print("view")
+
+# Print all expenses for current profile
+def view_expense_report(con, userid):
+
+    # Displaying all expenses organized by frequency
+    cost_frequencies = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
+    for frequency in cost_frequencies:
+
+        # Getting expenses per frequency for the current profile
+        query = 'SELECT * FROM expense_profiles WHERE ID LIKE "'+str(userid)+'" AND payinterval like "'+str(frequency)+'"'
+        expenses = fs.custom_query(con, query)
+        
+        # Keeping track if the frequency header was printed yet
+        printed_freq = 0
+
+        running_total_freq = 0
+        running_total = 0
+        
+        # Print relevant expenses
+        for expense in expenses:
+
+            # Printing frequency header if its the first object
+            if printed_freq == 0:
+                print("\n" + frequency, "Expenses:")
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                printed_freq = 1
+            print(expense[1] + ",",expense[2])
+            running_total_freq += expense[2]
+        
+        if printed_freq == 1:
+            # Printing running total
+            print("_____________________________________________________________________")
+            print("Sum of", frequency, "Expenses: $" + str(running_total_freq))
+        
+        # Calculating cost based on monthly expenses
+        if frequency == "Weekly": running_total += ((running_total_freq * 52) / 12)
+        elif frequency == "Bi-Weekly": running_total += ((running_total_freq * 26) / 12)
+        elif frequency == "Monthly": running_total += running_total_freq
+        elif frequency == "Yearly": running_total += (running_total_freq / 12)
+
+    # Printing running total for monthly average expenses
+    print("*********************************************************************")
+    print("Sum of average monthly expenses: $" + str(running_total))
 
 
 
