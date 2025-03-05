@@ -42,7 +42,7 @@ def add_entry(record, con):
     # Saving database info
     con.commit()
 
-# Adding new profile to DB
+# Adding new expense to DB
 def add_expense_DB(record, con):
 
     # Getting DB info
@@ -50,6 +50,18 @@ def add_expense_DB(record, con):
 
     # Sending 1 entry to the DB
     cur.executemany("INSERT INTO expense_profiles (ID, name, cost, payinterval) VALUES (:ID, :name, :income, :payinterval)", (record, ))
+
+    # Saving database info
+    con.commit()
+
+# Adding new mortgage to DB
+def add_mortgage_DB(record, con):
+
+    # Getting DB info
+    cur = con.cursor()
+
+    # Sending 1 entry to the DB
+    cur.executemany("INSERT INTO mortgage_profiles (ID, name, cost, downpayment, interestrate) VALUES (:ID, :name, :cost, :downpayment, :interestrate)", (record, ))
 
     # Saving database info
     con.commit()
@@ -79,7 +91,7 @@ def init_DB():
         con = sqlite3.connect(finance_sql)
         cur = con.cursor()
         cur.execute(
-            "CREATE TABLE budgeting_profiles(ID INTEGER PRIMARY KEY, name TEXT, income TEXT, payinterval TEXT)")
+            "CREATE TABLE budgeting_profiles(ID INTEGER PRIMARY KEY, name TEXT, income REAL, payinterval TEXT)")
         cur.execute(
             "CREATE TABLE expense_profiles(ID INTEGER, name TEXT, cost REAL, payinterval TEXT)")
         cur.execute(

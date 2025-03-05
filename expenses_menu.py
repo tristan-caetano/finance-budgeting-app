@@ -68,7 +68,7 @@ def expenses_menu(userid):
     curr_profile = fs.custom_query(con, query)
     for profile in curr_profile:
         print("\nName:", profile[1],
-            "\nIncome: $" + profile[2], profile[3])
+            "\nIncome: $" + str(profile[2]), profile[3])
     
     # Iterator for list
     list_num = 1
@@ -176,6 +176,7 @@ def view_expense_report(con, userid):
     # Printing running total for monthly average expenses
     print("*********************************************************************")
     print("Sum of average monthly expenses: $" + str(running_total))
+
 
 
 
