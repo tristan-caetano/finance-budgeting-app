@@ -1,27 +1,21 @@
 # Tristan Caetano
 # Finance Budgeting App: Profile Menu
-# This menu helps the user navigate their own profile
+# This menu helps the user navigate their own profile, expenses, mortgage, and can display a full expense report
 
 # Importing Python scripts
 import mortgage_menu as mm
-import budgeting_menu as bd
 import finance_sql as fs
 import expenses_menu as em
 
-# Importing packages
-import sqlite3
-from os.path import exists
-import pandas as pd
-
+# Main profile menu for the currently selected profile
 def profile_menu(userid):
 
     # Initializing DB
     con = fs.init_DB()
 
+    # Grabbing the name, income, and pay frequency of the user to display
     query = 'SELECT * FROM budgeting_profiles WHERE ID LIKE "'+str(userid)+'"'
-
     curr_profile = fs.custom_query(con, query)
-    
     for profile in curr_profile:
         print("\nName:", profile[1],
             "\nIncome: $" + str(profile[2]), profile[3])
@@ -30,6 +24,7 @@ def profile_menu(userid):
     # Iterator for list
     list_num = 1
 
+    # Loop for menu
     while(True):
 
         print("\nProfile Menu\n")
@@ -51,19 +46,23 @@ def profile_menu(userid):
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
             
-
+        # Resetting interator every time menu is reloaded
         list_num = 1
 
+# Displaying the full user profile report including: user information, expenses, mortgage information, and displaying a monthly cost and how much the user will save each month and year
 def view_full_profile(userid):
     
     # Initializing DB
     con = fs.init_DB()
 
+    # Querying for profile and mortgage information
     profile_q = 'SELECT * FROM budgeting_profiles WHERE ID LIKE "'+str(userid)+'"'
     mortgage_q = 'SELECT * FROM mortgage_profiles WHERE ID LIKE "'+str(userid)+'"'
-
     profile = None
     mortgage = None
+
+    # Beginning of the full budgeting report
+    print("\n**********************START OF BUDGETING REPORT**********************\n")
 
     # Showing profile
     curr_profile = fs.custom_query(con, profile_q)
@@ -72,8 +71,7 @@ def view_full_profile(userid):
         print("\nName:", profile[1],
             "\nIncome: $" + str(profile[2]), profile[3])
         
-    # Showing Expenses
-    print("\nExpenses:")
+    # Querying, showing expenses, and getting the average monthly expense cost
     monthly_expenses = get_monthly_expenses(con, userid)
 
     # Showing Mortgage
@@ -90,7 +88,7 @@ def view_full_profile(userid):
     i = (mortgage[4]/100) / 12 # Monthly Interest Rate
     n = 30 * 12 # 30 year fixed rate at 12 months a year
     monthly_mortgage_payment = P*((i*((1+i)**n))/(((1+i)**n)-1))
-    print("Monthly Mortgage Payment: $"+str(monthly_mortgage_payment))
+    print("Monthly Mortgage Payment: $"+str(round(monthly_mortgage_payment)))
 
     # Income math
     # Calculating cost based on monthly expenses
@@ -99,19 +97,23 @@ def view_full_profile(userid):
     elif profile[3] == "Bi-Weekly": monthly_income = ((profile[2] * 26) / 12)
     elif profile[3] == "Yearly": monthly_income = (profile[2] / 12)
 
-    # Finally
+    # Finally combining all monthly expenses and mortgage
     all_monthly_expenses = monthly_expenses + monthly_mortgage_payment
 
-    print("Total Monthly Expenses:$"+str(all_monthly_expenses))
-    print("Based on your income, you will have: $"+str(monthly_income - all_monthly_expenses),"leftover each month, and $"+ str((monthly_income - all_monthly_expenses)*12),"at the end of each year.")
-    print("\n********************************END OF FINAL BUDGETING REPORT********************************\n")
+    # Displaying final information
+    print("\nTotal Monthly Expenses: $"+str(round(all_monthly_expenses, 2)))
+    print("Based on your income, you will have: $"+str(round(monthly_income - all_monthly_expenses, 2)),"leftover each month, and $"+ str(round((monthly_income - all_monthly_expenses)*12, 2)),"at the end of each year.")
+    print("\n***********************END OF BUDGETING REPORT***********************\n")
 
-
-
-
+# Sub function to grab monthly expenses, without the extra stuff we dont need (this will be deleted later.)
 def get_monthly_expenses(con, userid):
      # Displaying all expenses organized by frequency
     cost_frequencies = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
+
+    # This value keeps track of all monthly spending
+    running_total = 0
+
+    # Printing out all expenses organized by their pay frequency
     for frequency in cost_frequencies:
 
         # Getting expenses per frequency for the current profile
@@ -122,7 +124,6 @@ def get_monthly_expenses(con, userid):
         printed_freq = 0
 
         running_total_freq = 0
-        running_total = 0
         
         # Print relevant expenses
         for expense in expenses:
@@ -132,7 +133,7 @@ def get_monthly_expenses(con, userid):
                 print("\n" + frequency, "Expenses:")
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 printed_freq = 1
-            print(expense[1] + ",",expense[2])
+            print(expense[1] + ", $"+str(expense[2]))
             running_total_freq += expense[2]
         
         # Calculating cost based on monthly expenses
@@ -142,7 +143,8 @@ def get_monthly_expenses(con, userid):
         elif frequency == "Yearly": running_total += (running_total_freq / 12)
 
     # Printing running total for monthly average expenses
-    print("*********************************************************************")
-    print("Sum of average monthly expenses: $" + str(running_total))
+    print("\n*********************************************************************")
+    print("Sum of average monthly expenses: $" + str(round(running_total,2)))
 
+    # Retuning the monthly average expenses to be combined with calculated monthly mortgage payment
     return running_total

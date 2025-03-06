@@ -3,14 +3,7 @@
 # This menu allows the user to manage their expenses.
 
 # Importing Python scripts
-import budgeting_menu as bd
 import finance_sql as fs
-import mortgage_menu as mm
-
-# Importing packages
-import sqlite3
-from os.path import exists
-import pandas as pd
 
 # Asking user to create a new profile
 def add_expense(con, userid):
@@ -40,6 +33,7 @@ def add_expense(con, userid):
             list_num += 1
         list_num = 1
 
+        # Asking user how often they must pay t his expense
         menu_in = input("\nEnter the number of the option that matches how often you must pay this expense.\n")
 
         if int(menu_in) <= len(list_of_options):
@@ -50,10 +44,13 @@ def add_expense(con, userid):
         if new_expense["payinterval"] != "NONE":
             break
 
-    new_expense["income"] = input("\nEnter the cost.\n")
+    # Asking user how much this expense costs
+    new_expense["cost"] = input("\nEnter the cost.\n")
+
+    # Submitting expense info to database
     fs.add_expense_DB(new_expense, con)
 
-
+# Main expense menu where the user can add, remove, or view their expenses for the current profile
 def expenses_menu(userid):
 
     # Initializing DB
@@ -96,6 +93,7 @@ def expenses_menu(userid):
 
 # Remove specified expense by name
 def remove_expense(con, userid):
+
     cur = con.cursor()
 
     while(True):
@@ -139,6 +137,9 @@ def view_expense_report(con, userid):
 
     # Displaying all expenses organized by frequency
     cost_frequencies = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
+
+    running_total = 0
+
     for frequency in cost_frequencies:
 
         # Getting expenses per frequency for the current profile
@@ -149,7 +150,6 @@ def view_expense_report(con, userid):
         printed_freq = 0
 
         running_total_freq = 0
-        running_total = 0
         
         # Print relevant expenses
         for expense in expenses:
@@ -176,9 +176,3 @@ def view_expense_report(con, userid):
     # Printing running total for monthly average expenses
     print("*********************************************************************")
     print("Sum of average monthly expenses: $" + str(running_total))
-
-
-
-
-
-

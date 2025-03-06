@@ -1,16 +1,10 @@
 # Tristan Caetano
 # Finance Budgeting App: Budgeting Menu
-# This menu helps the user create budgeting profiles.
+# This menu helps the user create and select budgeting profiles.
 
 # Importing Python scripts
-import mortgage_menu as mm
 import finance_sql as fs
 import profile_menu as pm
-
-# Importing packages
-import sqlite3
-from os.path import exists
-import pandas as pd
 
 # Asking user to create a new profile
 def create_new_profile(con):
@@ -29,6 +23,7 @@ def create_new_profile(con):
     # Userin loop for payinterval
     while(True):
 
+        # Possible pay intervals
         list_of_options = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
 
         # Printing out all found files to user
@@ -37,6 +32,7 @@ def create_new_profile(con):
             list_num += 1
         list_num = 1
 
+        # Asking user how often they are paid
         menu_in = input("\nEnter the number of the option that matches your pay frequency.\n")
 
         if int(menu_in) < len(list_of_options):
@@ -47,13 +43,13 @@ def create_new_profile(con):
         if new_profile["payinterval"] != "NONE":
             break
 
+    # Getting user income
     new_profile["income"] = input("\nEnter your income\n")
 
-    print("\nLength:", len(new_profile), "\n")
-
+    # Submitting mortgage information to database
     fs.add_entry(new_profile, con)
 
-
+# Budgeting menu where the user can select a profile
 def budgeting_menu():
 
     # List of menu options
@@ -64,7 +60,7 @@ def budgeting_menu():
 
     while(True):
 
-        # Initializing DB
+        # Initializing DB and getting profile names
         con = fs.init_DB()
         names = fs.get_profile_names(con)
 
@@ -94,4 +90,4 @@ def budgeting_menu():
 
         list_num = 1
 
-
+budgeting_menu()

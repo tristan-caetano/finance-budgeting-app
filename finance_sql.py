@@ -2,14 +2,9 @@
 # Finance Budgeting App: SQL File
 # This script contains all SQL query functions
 
-# Importing Python scripts
-import mortgage_menu as mm
-import budgeting_menu as bd
-
 # Importing packages
 import sqlite3
 from os.path import exists
-import pandas as pd
 
 # Custom query so that I dont need to make a function for every query type
 def custom_query(con, query):
@@ -49,7 +44,7 @@ def add_expense_DB(record, con):
     cur = con.cursor()
 
     # Sending 1 entry to the DB
-    cur.executemany("INSERT INTO expense_profiles (ID, name, cost, payinterval) VALUES (:ID, :name, :income, :payinterval)", (record, ))
+    cur.executemany("INSERT INTO expense_profiles (ID, name, cost, payinterval) VALUES (:ID, :name, :cost, :payinterval)", (record, ))
 
     # Saving database info
     con.commit()
