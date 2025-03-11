@@ -28,8 +28,8 @@ def profile_menu(userid):
     while(True):
 
         print("\nProfile Menu\n")
-        list_of_options = ["View Full Profile", "Add/Remove Expenses", "Mortgage Menu"]
-        list_of_options_link = [view_full_profile, em.expenses_menu, mm.mortgage_menu]
+        list_of_options = ["View Full Profile", "Add Expense", "Remove Expense", "Add Mortgage", "Remove Mortgage"]
+        list_of_options_link = [view_full_profile, em.add_expense, em.remove_expense, mm.add_mortgage, mm.remove_mortgage]
 
         # Printing out all found files to user
         for option in list_of_options:
@@ -42,7 +42,7 @@ def profile_menu(userid):
         if menu_in == "q" or menu_in == "Q":
                 return
         elif int(menu_in) < list_num and int(menu_in) > 0:
-            list_of_options_link[int(menu_in) - 1](userid)
+            list_of_options_link[int(menu_in) - 1](con, userid)
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
             
@@ -50,7 +50,7 @@ def profile_menu(userid):
         list_num = 1
 
 # Displaying the full user profile report including: user information, expenses, mortgage information, and displaying a monthly cost and how much the user will save each month and year
-def view_full_profile(userid):
+def view_full_profile(con, userid):
     
     # Initializing DB
     con = fs.init_DB()
@@ -60,6 +60,8 @@ def view_full_profile(userid):
     mortgage_q = 'SELECT * FROM mortgage_profiles WHERE ID LIKE "'+str(userid)+'"'
     profile = None
     mortgage = None
+    monthly_expenses = 0
+    monthly_mortgage_payment = 0
 
     # Beginning of the full budgeting report
     print("\n**********************START OF BUDGETING REPORT**********************\n")
@@ -71,35 +73,42 @@ def view_full_profile(userid):
         print("\nName:", profile[1],
             "\nIncome: $" + str(profile[2]), profile[3])
         
-    # Querying, showing expenses, and getting the average monthly expense cost
-    monthly_expenses = get_monthly_expenses(con, userid)
+        # Querying, showing expenses, and getting the average monthly expense cost
+        monthly_expenses = get_monthly_expenses(con, userid)
 
-    # Showing Mortgage
-    mortgages = fs.custom_query(con, mortgage_q)
-    for mortgage_c in mortgages:
-        mortgage = mortgage_c
-        print("\n"+mortgage[1],"costs $"+str(mortgage[2]),"at an interest rate of",str(mortgage[4])+"% with a $"+str(mortgage[3]),"downpayment.")
 
-    # Final math (oh boy)
-    # Mortgage Math
-    full_house_price = mortgage[2]
-    downpayment = mortgage[3]
-    P = full_house_price - downpayment # Principal
-    i = (mortgage[4]/100) / 12 # Monthly Interest Rate
-    n = 30 * 12 # 30 year fixed rate at 12 months a year
-    monthly_mortgage_payment = P*((i*((1+i)**n))/(((1+i)**n)-1))
-    print("Monthly Mortgage Payment: $"+str(round(monthly_mortgage_payment)))
+    try:
+        # Showing Mortgage
+        mortgages = fs.custom_query(con, mortgage_q)
+        for mortgage_c in mortgages:
+            mortgage = mortgage_c
+            print("\n"+mortgage[1],"costs $"+str(mortgage[2]),"at an interest rate of",str(mortgage[4])+"% with a $"+str(mortgage[3]),"downpayment.")
 
+        # Final math (oh boy)
+        # Mortgage Math
+        full_house_price = mortgage[2]
+        downpayment = mortgage[3]
+        P = full_house_price - downpayment # Principal
+        i = (mortgage[4]/100) / 12 # Monthly Interest Rate
+        n = 30 * 12 # 30 year fixed rate at 12 months a year
+        monthly_mortgage_payment = P*((i*((1+i)**n))/(((1+i)**n)-1))
+        print("Monthly Mortgage Payment: $"+str(round(monthly_mortgage_payment)))
+
+    except:
+        # If no mortages, print nothing
+        print("\nNO MORTGAGES")
+        monthly_mortgage_payment = 0
+
+    # Finally combining all monthly expenses and mortgage
+    all_monthly_expenses = monthly_expenses + monthly_mortgage_payment
+    
     # Income math
     # Calculating cost based on monthly expenses
     monthly_income = profile[2]
     if profile[3] == "Weekly": monthly_income = ((profile[2] * 52) / 12)
     elif profile[3] == "Bi-Weekly": monthly_income = ((profile[2] * 26) / 12)
     elif profile[3] == "Yearly": monthly_income = (profile[2] / 12)
-
-    # Finally combining all monthly expenses and mortgage
-    all_monthly_expenses = monthly_expenses + monthly_mortgage_payment
-
+    
     # Displaying final information
     print("\nTotal Monthly Expenses: $"+str(round(all_monthly_expenses, 2)))
     print("Based on your income, you will have: $"+str(round(monthly_income - all_monthly_expenses, 2)),"leftover each month, and $"+ str(round((monthly_income - all_monthly_expenses)*12, 2)),"at the end of each year.")
