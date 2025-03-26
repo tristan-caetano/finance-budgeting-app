@@ -6,6 +6,7 @@
 import mortgage_menu as mm
 import finance_sql as fs
 import expenses_menu as em
+import tracking_menu as tm
 
 # Main profile menu for the currently selected profile
 def profile_menu(userid):
@@ -28,8 +29,8 @@ def profile_menu(userid):
     while(True):
 
         print("\nProfile Menu\n")
-        list_of_options = ["View Full Profile", "Add Expense", "Remove Expense", "Add Mortgage", "Remove Mortgage"]
-        list_of_options_link = [view_full_profile, em.add_expense, em.remove_expense, mm.add_mortgage, mm.remove_mortgage]
+        list_of_options = ["View Full Profile", "Add Expense", "Remove Expense", "Add Mortgage", "Remove Mortgage", "Add Tracked Payment", "Remove Tracked Payment", "View Payment Tracking Report"]
+        list_of_options_link = [view_full_profile, em.add_expense, em.remove_expense, mm.add_mortgage, mm.remove_mortgage, tm.add_tracking, tm.remove_tracking, tm.view_tracking_report]
 
         # Printing out all found files to user
         for option in list_of_options:

@@ -1,3 +1,5 @@
+#! /bin/python3
+
 # Tristan Caetano
 # Finance Budgeting App: Budgeting Menu
 # This menu helps the user create and select budgeting profiles.

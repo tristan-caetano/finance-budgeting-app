@@ -49,6 +49,19 @@ def add_expense_DB(record, con):
     # Saving database info
     con.commit()
 
+# Adding new tracking to DB
+def add_tracking_DB(record, con):
+
+    # Getting DB info
+    cur = con.cursor()
+
+    # Sending 1 entry to the DB
+    cur.executemany("INSERT INTO tracking_profiles (ID, name, cost, day, month, year ) VALUES (:ID, :name, :cost, :day, :month, :year)", (record, ))
+
+    # Saving database info
+    con.commit()
+
+
 # Adding new mortgage to DB
 def add_mortgage_DB(record, con):
 
@@ -91,6 +104,8 @@ def init_DB():
             "CREATE TABLE expense_profiles(ID INTEGER, name TEXT, cost REAL, payinterval TEXT)")
         cur.execute(
             "CREATE TABLE mortgage_profiles(ID INTEGER, name TEXT, cost REAL, downpayment REAL, interestrate REAL)")
+        cur.execute(
+            "CREATE TABLE tracking_profiles(ID INTEGER, name TEXT, cost REAL, day INTEGER, month INTEGER, year INTEGER)")
 
     else:
         # Connecting to DB
