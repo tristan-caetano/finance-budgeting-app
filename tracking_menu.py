@@ -50,7 +50,7 @@ def remove_tracking(con, userid):
 
     cur = con.cursor()
 
-    print("\nYou can only edit tracking for the CURRENT month.\nRetroactive tracking is currently not implemented.\n")
+    print("\nYou can only edit tracking for the CURRENT month.\nRetroactive tracking is currently not implemented.")
 
     # Getting current month and year for query
     curr_month = str(datetime.today().strftime('%m'))
@@ -65,7 +65,7 @@ def remove_tracking(con, userid):
             return
 
         # Getting payments per frequency for the current profile
-        query = 'SELECT * FROM tracking_profiles WHERE ID LIKE "'+str(userid)+'" AND name like "'+payment+'" AND month like "'+month+'" AND year like "'+year+'"'
+        query = 'SELECT * FROM tracking_profiles WHERE ID LIKE "'+str(userid)+'" AND name like "'+payment+'" AND month like "'+str(int(curr_month))+'" AND year like "'+curr_year+'"'
         
          # Try except block in case an error is thrown
         try:
@@ -73,8 +73,22 @@ def remove_tracking(con, userid):
             # Getting data for specified payment
             payments = fs.custom_query(con, query)
 
+            i = 1
+
             for an_payment in payments:
-                print(an_payment[1] + ",",an_payment[2])
+                print(i, an_payment[1] + ",",an_payment[2])
+                i += 1
+            
+            # Asking user which one is the one they would like to delete
+            user_in = input("Input the number of the item you would like to delete.\n")
+
+            i = 0
+            for an_payment in payments:
+                print(i, an_payment[1] + ",",an_payment[2])
+                if i is int(user_in):
+                    break
+
+            print("Is this correct?\n", an_payment[1] + ",",an_payment[2])
 
             # Printing recieved data to user can verify
             user_in = input("Is this correct?\n(Y) or (y) for yes, any other character for no.\n")
@@ -85,7 +99,7 @@ def remove_tracking(con, userid):
          # If the user verified the album grabbed was correct, proceed
         if(user_in == "y" or user_in == "Y"):
             # Query that deletes 1 record for a specific album by name
-            query = 'DELETE FROM payment_profiles WHERE name LIKE "'+payment+'" AND ID LIKE "'+str(userid)+'" AND month like "'+month+'" AND year like "'+year+'"'
+            query = 'DELETE FROM payment_profiles WHERE name LIKE "'+payment+'" AND ID LIKE "'+str(userid)+'" AND month like "'+curr_month+'" AND year like "'+curr_year+'"'
 
             # Executing the query and saving changes
             cur.execute(query)

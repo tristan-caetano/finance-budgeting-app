@@ -8,6 +8,52 @@ import finance_sql as fs
 import expenses_menu as em
 import tracking_menu as tm
 
+# Changing existing profile
+def change_profile(con, userid):
+
+     # Creating new dictionary for profile
+    new_profile = dict()
+
+    # Getting user name
+    new_profile["name"] = input("\nEnter your name.\n\n")
+
+    # Default value for payinterval for user input loop
+    new_profile["payinterval"] = "NONE"
+
+    list_num = 1
+
+    # Userin loop for payinterval
+    while(True):
+
+        # Possible pay intervals
+        list_of_options = ["Weekly", "Bi-Weekly", "Monthly", "Yearly"]
+
+        # Printing out all found files to user
+        for option in list_of_options:
+            print(str(list_num) + ").", option), "\n"
+            list_num += 1
+        list_num = 1
+
+        # Asking user how often they are paid
+        menu_in = input("\nEnter the number of the option that matches your pay frequency.\n")
+
+        if int(menu_in) < len(list_of_options):
+            new_profile["payinterval"] = list_of_options[int(menu_in) - 1]
+        else:  
+            print("Option not found, please input an available number.\n")
+
+        if new_profile["payinterval"] != "NONE":
+            break
+
+    # Getting user income
+    new_profile["income"] = input("\nEnter your income\n")
+
+    # Setting query
+    query = 'UPDATE budgeting_profiles SET name ="'+new_profile["name"]+'", income ="'+new_profile["income"]+'", payinterval = "'+new_profile["payinterval"]+'" WHERE ID = "'+str(userid)+'"'
+    print(query)
+
+    fs.custom_query(con, query)
+
 # Main profile menu for the currently selected profile
 def profile_menu(userid):
 
@@ -29,8 +75,8 @@ def profile_menu(userid):
     while(True):
 
         print("\nProfile Menu\n")
-        list_of_options = ["View Full Profile", "Add Expense", "Remove Expense", "Add Mortgage", "Remove Mortgage", "Add Tracked Payment", "Remove Tracked Payment", "View Payment Tracking Report"]
-        list_of_options_link = [view_full_profile, em.add_expense, em.remove_expense, mm.add_mortgage, mm.remove_mortgage, tm.add_tracking, tm.remove_tracking, tm.view_tracking_report]
+        list_of_options = ["View Full Profile", "Change User Info", "Add Expense", "Remove Expense", "Add Mortgage", "Remove Mortgage", "Add Tracked Payment", "Remove Tracked Payment", "View Payment Tracking Report", "DELETE PROFILE"]
+        list_of_options_link = [view_full_profile, change_profile, em.add_expense, em.remove_expense, mm.add_mortgage, mm.remove_mortgage, tm.add_tracking, tm.remove_tracking, tm.view_tracking_report, delete_profile_menu]
 
         # Printing out all found files to user
         for option in list_of_options:
@@ -41,9 +87,12 @@ def profile_menu(userid):
         menu_in = input("\nEnter the number of the option you would like, or enter 'q' to go back to the previous menu.\n")
 
         if menu_in == "q" or menu_in == "Q":
-                return
+            return
         elif int(menu_in) < list_num and int(menu_in) > 0:
-            list_of_options_link[int(menu_in) - 1](con, userid)
+            quit_back = False
+            quit_back = list_of_options_link[int(menu_in) - 1](con, userid)
+            if quit_back:
+                return
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
             
@@ -76,7 +125,6 @@ def view_full_profile(con, userid):
         
         # Querying, showing expenses, and getting the average monthly expense cost
         monthly_expenses = get_monthly_expenses(con, userid)
-
 
     try:
         # Showing Mortgage
@@ -158,3 +206,37 @@ def get_monthly_expenses(con, userid):
 
     # Retuning the monthly average expenses to be combined with calculated monthly mortgage payment
     return running_total
+
+# Menu to completely delete the current user profile
+def delete_profile_menu(con, userid):
+
+    # Initializing DB
+    con = fs.init_DB()
+
+    # Grabbing the name, income, and pay frequency of the user to display
+    query = 'SELECT * FROM budgeting_profiles WHERE ID LIKE "'+str(userid)+'"'
+    curr_profile = fs.custom_query(con, query)
+    for profile in curr_profile:
+        print("\nName:", profile[1],
+            "\nIncome: $" + str(profile[2]), profile[3])
+
+    # Menu to ask the user if they'd like to delete the current profile
+    while(True):
+
+        menu_in = input(f"\nDo you want to delete the profile: {profile[1]} (Y/N)?\n")
+
+        # The menu will check if they want to delete the profile twice, in case they don't want to
+        if menu_in == "y" or menu_in == "Y":
+            menu_in = input(f"\nTHE PROFILE: {profile[1]} WILL BE COMPLETELY DELETED! ARE YOU SURE? (Y/N)?\n")
+            if menu_in == "y" or menu_in == "Y":
+                fs.delete_profile(con, userid)
+                print("Profile:",str(profile[1]), "has been successfully deleted.")
+                return True # Profile is deleted, so we want to quit back all the way to the budgeting menu
+            elif menu_in == "n" or menu_in == "N":
+                return
+            else:
+                print("\nCommand not found, please input Y or N.\n")
+        elif menu_in == "n" or menu_in == "N":
+            return
+        else:
+            print("\nCommand not found, please input Y or N.\n")

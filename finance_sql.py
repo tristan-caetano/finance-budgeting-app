@@ -26,13 +26,18 @@ def get_profile_names(con):
     return result
 
 # Adding new profile to DB
-def add_entry(record, con):
+def add_entry(record, con, userid):
 
     # Getting DB info
     cur = con.cursor()
 
-    # Sending 1 entry to the DB
-    cur.executemany("INSERT INTO budgeting_profiles (name, income, payinterval) VALUES (:name, :income, :payinterval)", (record, ))
+    if userid == 0:
+        # Sending 1 entry to the DB
+        cur.executemany("INSERT INTO budgeting_profiles (name, income, payinterval) VALUES (:name, :income, :payinterval)", (record, ))
+    else:
+        record["userid"] = userid
+        cur.executemany("INSERT INTO budgeting_profiles (ID, name, income, payinterval) VALUES (:userid, :name, :income, :payinterval)", (record, ))
+
 
     # Saving database info
     con.commit()
@@ -113,3 +118,18 @@ def init_DB():
 
     # Returning DB info
     return con
+
+# Adding new mortgage to DB
+def delete_profile(con, userid):
+
+    # Getting DB info
+    cur = con.cursor()
+
+    # Deleting entire profile
+    cur.execute('DELETE FROM budgeting_profiles WHERE ID LIKE "'+str(userid)+'"')
+    cur.execute('DELETE FROM expense_profiles WHERE ID LIKE "'+str(userid)+'"')
+    cur.execute('DELETE FROM mortgage_profiles WHERE ID LIKE "'+str(userid)+'"')
+    cur.execute('DELETE FROM tracking_profiles WHERE ID LIKE "'+str(userid)+'"')
+
+    # Saving database info
+    con.commit()

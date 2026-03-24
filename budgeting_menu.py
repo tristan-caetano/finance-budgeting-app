@@ -5,11 +5,11 @@
 # This menu helps the user create and select budgeting profiles.
 
 # Importing Python scripts
-import finance_sql as fs
 import profile_menu as pm
+import finance_sql as fs
 
 # Asking user to create a new profile
-def create_new_profile(con):
+def create_new_profile(con, userid=0):
 
     # Creating new dictionary for profile
     new_profile = dict()
@@ -49,7 +49,7 @@ def create_new_profile(con):
     new_profile["income"] = input("\nEnter your income\n")
 
     # Submitting mortgage information to database
-    fs.add_entry(new_profile, con)
+    fs.add_entry(new_profile, con, userid)
 
 # Budgeting menu where the user can select a profile
 def budgeting_menu():
@@ -61,6 +61,9 @@ def budgeting_menu():
     list_num = 1
 
     while(True):
+
+        # Listing names, so deleting doesnt mess up the order of ids
+        list_of_ids = []
 
         # Initializing DB and getting profile names
         con = fs.init_DB()
@@ -76,6 +79,7 @@ def budgeting_menu():
         
         for name in names:
             print(str(list_num) + ").", name[1], "ID:", name[0]), "\n"
+            list_of_ids.append(name[0])
             list_num += 1
         
         menu_in = input("\nEnter the number of the option you would like, or enter 'q' to go back to the previous menu.\n")
@@ -86,7 +90,7 @@ def budgeting_menu():
             if menu_in == '1':
                 create_new_profile(con)
             else:
-                pm.profile_menu(int(menu_in) - 1)
+                pm.profile_menu(list_of_ids[int(menu_in) - 2])
         else:
             print("\nCommand not found, please input an available number or 'q'.\n")
 
