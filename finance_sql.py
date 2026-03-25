@@ -111,6 +111,8 @@ def init_DB():
             "CREATE TABLE mortgage_profiles(ID INTEGER, name TEXT, cost REAL, downpayment REAL, interestrate REAL)")
         cur.execute(
             "CREATE TABLE tracking_profiles(ID INTEGER, name TEXT, cost REAL, day INTEGER, month INTEGER, year INTEGER)")
+        cur.execute(
+            "CREATE TABLE monthly_expenses(ID INTEGER, cost REAL, month TEXT, year TEXT, PRIMARY KEY (ID, month, year))")
 
     else:
         # Connecting to DB
